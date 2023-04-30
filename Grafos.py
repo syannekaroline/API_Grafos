@@ -1,4 +1,6 @@
 
+# Syanne Karoline Moreira Tavares - 202104940029 - API grafos 
+
 class Grafo_listaAdj:
 
     def __init__(self, vertices):
@@ -53,7 +55,7 @@ class Grafo_MatrizAdj:
       
 
     def ToString(self):
-        """Mostra a representação do grafo em lista de adjacência"""
+        """Mostra a representação do grafo em matriz de adjacência"""
         print('A matriz de adjacências é:')
         for i in range(self.vertices):
             print(self.grafo_matriz[i])
@@ -105,4 +107,3 @@ class Grafo_MatrizAdj:
 
 # print(f"Vértices adjacentes a 1: {g.V_Adj(1)}")
 # print(f"Vértices adjacentes a 2: {g.V_Adj(2)}")
-
