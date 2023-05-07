@@ -6,13 +6,17 @@ class Grafo_listaAdj:
     def __init__(self, vertices):
         self.vertices = vertices
         self.grafo_lista = [[] for i in range(self.vertices)] # cria a representação lista de adjacência
+        # DFS
+        self.pi=dict()
+        self.cor = dict()
+        self.d=dict()
+        self.f=dict()
+        self.time=0
 
     def AddAresta(self, u, v):
         """Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro."""
-
         self.grafo_lista[u-1].append(v)
-        self.grafo_lista[v-1].append(u)
-        
+
     def ToString(self):
         """Mostra a representação do grafo matriz de adjacencia."""
 
@@ -40,12 +44,48 @@ class Grafo_listaAdj:
         """Retorna os vértices adjacentes a v."""
         ##verificação na lista de adjacencia
         return self.grafo_lista[v-1]
+    
+    def DFS(self):
+
+        for v in range(self.vertices): 
+            self.pi[v+1]=None
+            self.cor[v+1]="BRANCO"
+        for v in range(self.vertices):
+            if self.cor[v+1]=="BRANCO":
+                self.dfs_visit(v+1)
+
+        print("DSF\nTempos iniciais d[v] =",self.d)
+        print("Tempos Finais f[v] =",self.f)
+        print("Lista de antecessores pi[v] =",self.pi)
+
+
+    def dfs_visit(self, u):
+        self.cor[u] = "CINZA"
+        self.time=self.time+1
+        self.d[u]=self.time
+
+        for v in self.V_Adj(u):
+            if self.cor[v]=="BRANCO":
+                self.pi[v]=u
+                self.dfs_visit(v)
+        self.cor[u]="PRETO"
+        self.time=self.time+1
+        self.f[u]= self.time
 
 class Grafo_MatrizAdj:
 
     def __init__(self, vertices):
         self.vertices = vertices
         self.grafo_matriz = [[0]*self.vertices for i in range(self.vertices)] # cria a representação matriz de adjacência
+        # DFS
+        self.pi=dict()
+        self.cor = dict()
+        self.d=dict()
+        self.f=dict()
+        self.time=0
+
+        #BFS
+        self.Q=list()
 
     def AddAresta(self, u, v):
         """Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro."""
@@ -76,8 +116,6 @@ class Grafo_MatrizAdj:
 
         return n_arestas/2
 
-
-
     def V_Adj(self,v):
         """Retorna os vértices adjacentes a v."""
 
@@ -88,22 +126,29 @@ class Grafo_MatrizAdj:
                 vAdj.append(i+1)
 
         return vAdj
+    
+    def DFS(self):
 
-# g = Grafo_MatrizAdj(4)
-# # g.ToString()
+        for v in range(self.vertices): 
+            self.pi[v+1]=None
+            self.cor[v+1]="BRANCO"
+        for v in range(self.vertices):
+            if self.cor[v+1]=="BRANCO":
+                self.dfs_visit(v+1)
 
-# g.AddAresta(1,2)
-# g.AddAresta(1,3)
-# g.AddAresta(1,4)
-# g.AddAresta(2,3)
+        print("DSF\nTempos iniciais d[v] =",self.d)
+        print("Tempos Finais f[v] =",self.f)
+        print("Lista de antecessores pi[v] =",self.pi)
 
-# g.ToString()
-# n_vertices = g.V()
-# print(f"Número de vértices = {n_vertices}")
-# n_Arestas = g.A()
-# print(f"Número de Arestas = {n_Arestas}")
-# # Arestas = g.ArestasList
-# # print(f"Conjunto de Arestas = {Arestas}")
+    def dfs_visit(self, u):
+        self.cor[u] = "CINZA"
+        self.time=self.time+1
+        self.d[u]=self.time
 
-# print(f"Vértices adjacentes a 1: {g.V_Adj(1)}")
-# print(f"Vértices adjacentes a 2: {g.V_Adj(2)}")
+        for v in self.V_Adj(u):
+            if self.cor[v]=="BRANCO":
+                self.pi[v]=u
+                self.dfs_visit(v)
+        self.cor[u]="PRETO"
+        self.time=self.time+1
+        self.f[u]= self.time
