@@ -12,6 +12,8 @@ class Grafo_listaAdj:
         self.d=dict()
         self.f=dict()
         self.time=0
+        #bfs
+        self.Fila_Q=list()
 
     def AddAresta(self, u, v):
         """Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro."""
@@ -71,6 +73,36 @@ class Grafo_listaAdj:
         self.cor[u]="PRETO"
         self.time=self.time+1
         self.f[u]= self.time
+        
+    ############ bfs
+    def BFS(self,s):
+       
+        for u in range(self.vertices):
+            if u+1 != s:
+                self.cor[u+1]="BRANCO"
+                self.d[u+1]=None
+                self.pi[u+1]=None
+            else:
+                continue
+        self.cor[s]="CINZA"
+        self.d[s]=0
+        self.pi[s]=None
+        self.Fila_Q.append(s)
+
+        while len(self.Fila_Q) != 0:
+            u =self.Fila_Q[0]
+            self.Fila_Q.pop(0)
+            for v in self.V_Adj(u):
+                if self.cor[v] =="BRANCO":
+                    self.cor[v]="CINZA"
+                    self.d[v] = self.d[u] +1
+                    self.pi[v] = u
+                    self.Fila_Q.append(v)
+            self.cor[u]="PRETO"
+         
+
+        print("BSF\nTempos iniciais d[v] =",self.d)
+        print("Lista de antecessores pi[v] =",self.pi)
 
 class Grafo_MatrizAdj:
 
@@ -85,7 +117,7 @@ class Grafo_MatrizAdj:
         self.time=0
 
         #BFS
-        self.Q=list()
+        self.Fila_Q=list()
 
     def AddAresta(self, u, v):
         """Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro."""
@@ -152,3 +184,34 @@ class Grafo_MatrizAdj:
         self.cor[u]="PRETO"
         self.time=self.time+1
         self.f[u]= self.time
+
+
+    ############ bfs
+    def BFS(self,s):
+       
+        for u in range(self.vertices):
+            if u+1 != s:
+                self.cor[u+1]="BRANCO"
+                self.d[u+1]=None
+                self.pi[u+1]=None
+            else:
+                continue
+        self.cor[s]="CINZA"
+        self.d[s]=0
+        self.pi[s]=None
+        self.Fila_Q.append(s)
+
+        while len(self.Fila_Q) != 0:
+            u =self.Fila_Q[0]
+            self.Fila_Q.pop(0)
+            for v in self.V_Adj(u):
+                if self.cor[v] =="BRANCO":
+                    self.cor[v]="CINZA"
+                    self.d[v] = self.d[u] +1
+                    self.pi[v] = u
+                    self.Fila_Q.append(v)
+            self.cor[u]="PRETO"
+         
+
+        print("BSF\nTempos iniciais d[v] =",self.d)
+        print("Lista de antecessores pi[v] =",self.pi)
