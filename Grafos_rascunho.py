@@ -224,7 +224,6 @@ g.AddAresta(1,7)
 g.AddAresta(1,8)
 g.AddAresta(1,6)
 
-
 g.AddAresta(2,1)
 g.AddAresta(2,8)
 
