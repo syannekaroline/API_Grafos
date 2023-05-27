@@ -3,8 +3,9 @@
 
 class Grafo_listaAdj:
 
-    def __init__(self, vertices):
+    def __init__(self, vertices, N_orientado=False):
         self.vertices = vertices
+        self.N_orientado=N_orientado
         self.grafo_lista = [[] for i in range(self.vertices)] # cria a representação lista de adjacência
         # DFS
         self.pi=dict()
@@ -17,7 +18,8 @@ class Grafo_listaAdj:
 
     def AddAresta(self, u, v):
         """Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro."""
-        self.grafo_lista[u-1].append(v)
+
+        self.grafo_lista[u-1].append(v) if self.N_orientado else self.grafo_lista[v-1].append(u)
 
     def ToString(self):
         """Mostra a representação do grafo matriz de adjacencia."""
@@ -216,7 +218,7 @@ class Grafo_MatrizAdj:
         print("BSF\nTempos iniciais d[v] =",self.d)
         print("Lista de antecessores pi[v] =",self.pi)
 
-g = Grafo_MatrizAdj(8)
+g = Grafo_listaAdj(8,True)
 # g.ToString()
 
 g.AddAresta(1,2)

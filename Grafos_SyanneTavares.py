@@ -1,11 +1,15 @@
 
 # Syanne Karoline Moreira Tavares - 202104940029 - API grafos
 
+import math
+
+
 class Grafo_listaAdj:
 
-    def __init__(self, vertices, N_orientado=True):
+    def __init__(self, vertices, N_orientado=True, Ponderado=False):
         self.vertices = vertices
         self.N_orientado = N_orientado
+        self.Ponderado = Ponderado
 
         # cria a representação lista de adjacência
         self.grafo_lista = [[] for i in range(self.vertices)]
@@ -18,12 +22,20 @@ class Grafo_listaAdj:
         # bfs
         self.Fila_Q = list()
 
-    def AddAresta(self, u, v):
-        """Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro."""
+        # caminhos mínimos
+        self.S = list()
 
-        self.grafo_lista[u-1].append(v)
-        if self.N_orientado:
-            self.grafo_lista[v-1].append(u)
+    def AddAresta(self, u, v, w=None):
+        """Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro. Caso seja ponderado recebe o peso w."""
+
+        if self.Ponderado:
+            self.grafo_lista[u-1].append([v, w])
+            if self.N_orientado:
+                self.grafo_lista[v-1].append([u, w])
+        else:
+            self.grafo_lista[u-1].append(v)
+            if self.N_orientado:
+                self.grafo_lista[v-1].append(u)
 
     def ToString(self):
         """Mostra a representação do grafo matriz de adjacencia."""
@@ -51,6 +63,12 @@ class Grafo_listaAdj:
     def V_Adj(self, v):
         """Retorna os vértices adjacentes a v."""
         # verificação na lista de adjacencia
+        if self.Ponderado:
+            vAdj = list()
+            for i in self.grafo_lista[v-1]:
+                vAdj.append(i[0])
+            return vAdj
+
         return self.grafo_lista[v-1]
 
     def DFS(self):
@@ -107,15 +125,35 @@ class Grafo_listaAdj:
 
         print("BSF\nTempos iniciais d[v] =", self.d)
         print("Lista de antecessores pi[v] =", self.pi)
+    ############################## Algoritmos caminhos mínimos###################################
+
+    def Inicialize_Single_Sorce(self, s):
+        """Função que inicializa as variáveis auxiliares na execução do algoritmo de caminhos mínimo."""
+        for i in range(self.vertices):
+            self.d[i+1] = math.inf
+            self.pi[i+1] = None
+        self.d[s] = 0
+
+    # def Relax(self,u,v,w):
+    #     """Função que realiza o relaxamento de um vértice u até v com peso w."""
+
+    #     if self.d[v] == self.d[u] + w
 
 
 class Grafo_MatrizAdj:
 
-    def __init__(self, vertices, N_orientado=True):
+    def __init__(self, vertices, N_orientado=True, Ponderado=False):
         self.vertices = vertices
         self.N_orientado = N_orientado
+        self.Ponderado = Ponderado
+
+        if Ponderado:
+            self.grafo_ponderado = [
+                [0]*self.vertices for i in range(self.vertices)]
+
         # cria a representação matriz de adjacência
         self.grafo_matriz = [[0]*self.vertices for i in range(self.vertices)]
+
         # DFS
         self.pi = dict()
         self.cor = dict()
@@ -126,8 +164,8 @@ class Grafo_MatrizAdj:
         # BFS
         self.Fila_Q = list()
 
-    def AddAresta(self, u, v):
-        """Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro."""
+    def AddAresta(self, u, v, w=None):
+        """Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro. Se for pondera w é o peso entre os vértices"""
 
         # trocar = por += ser for grafo múltiplo
         self.grafo_matriz[u-1][v-1] = 1
@@ -135,11 +173,21 @@ class Grafo_MatrizAdj:
             # (caso o grafo não seja direcionado)
             self.grafo_matriz[v-1][u-1] = 1
 
+        if self.Ponderado:
+            self.grafo_ponderado[v-1][u-1] = w
+            if self.N_orientado:
+                self.grafo_ponderado[u-1][v-1] = w
+
     def ToString(self):
         """Mostra a representação do grafo em matriz de adjacência"""
         print('A matriz de adjacências é:')
         for i in range(self.vertices):
             print(self.grafo_matriz[i])
+
+        if self.Ponderado:
+            print('A matriz do grafo ponderado:')
+            for i in range(self.vertices):
+                print(self.grafo_ponderado[i])
 
     def V(self):
         """Retorna o número de Vértices do Grafo"""
@@ -222,3 +270,16 @@ class Grafo_MatrizAdj:
 
         print("BSF\nTempos iniciais d[v] =", self.d)
         print("Lista de antecessores pi[v] =", self.pi)
+
+
+# g = Grafo_MatrizAdj(3, Ponderado=True)
+# # g.ToString()
+
+# g.AddAresta(1, 2, 4)
+# g.AddAresta(1, 3, 5)
+# g.AddAresta(2, 3, 6)
+
+# g.ToString()
+# print(g.V_Adj(1))
+# print(g.V())
+# print(g.A())
