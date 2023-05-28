@@ -2,6 +2,7 @@
 # Syanne Karoline Moreira Tavares - 202104940029 - API grafos
 
 import math
+import HeapMin
 
 
 class Grafo_listaAdj:
@@ -272,14 +273,14 @@ class Grafo_MatrizAdj:
         print("Lista de antecessores pi[v] =", self.pi)
 
 
-# g = Grafo_MatrizAdj(3, Ponderado=True)
-# # g.ToString()
-
-# g.AddAresta(1, 2, 4)
-# g.AddAresta(1, 3, 5)
-# g.AddAresta(2, 3, 6)
-
+g = Grafo_MatrizAdj(3, Ponderado=True)
 # g.ToString()
-# print(g.V_Adj(1))
-# print(g.V())
-# print(g.A())
+
+g.AddAresta(1, 2, 4)
+g.AddAresta(1, 3, 5)
+g.AddAresta(2, 3, 6)
+
+g.ToString()
+print(g.V_Adj(1))
+print(g.V())
+print(g.A())
