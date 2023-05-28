@@ -2,8 +2,6 @@
 # Syanne Karoline Moreira Tavares - 202104940029 - API grafos
 
 import math
-import HeapMin as hp
-
 
 class Grafo_listaAdj:
 
@@ -11,6 +9,8 @@ class Grafo_listaAdj:
         self.vertices = vertices
         self.N_orientado = N_orientado
         self.Ponderado = Ponderado
+        self.Q_prioridades = dict()  # usado no Dijkstra
+
 
         # cria a representação lista de adjacência
         self.grafo_lista = [[] for i in range(self.vertices)]
@@ -137,41 +137,34 @@ class Grafo_listaAdj:
 
         if self.d[v] > self.d[u] + w:
             self.d[v] = self.d[u] + w
-            self.d[v] = u
+            self.pi[v] = u
+            self.Q_prioridades[v]=w + self.d[u]
 
     def Dijkstra(self, s):
+        """Função que realiza o algoritmo de dijkstra iniciado pelo vértice s recebido por parâmetro.\n
+        Retorno:\n
+        lista com o vetor S\n
+        dicionário pi com os antecessores de cada vértice\n
+        dicionário d com distâncias mínimas de s até cada vértice."""
 
         if not self.Ponderado:
             print("Dijkstra não é implementado para grafos não Ponderados!")
         else:
+            S_list=list()
+            self.Inicialize_Single_Source(s)
+            self.Q_prioridades[s]=0
 
-            S = [[-1, 0] for i in range(self.vertices)]
-            S[s - 1] = [0, s]
-            Q_prioridades = dict()  # usado no Dijkstra
-
-            Q_prioridades[s]=0
-            while len(Q_prioridades) > 0:
+            while len(self.Q_prioridades) > 0:
                 #ExtractMin -> v
-                v = [key for key in Q_prioridades if Q_prioridades[key] == min(Q_prioridades.values()) ][0]
-                dist = Q_prioridades[v]
-                del Q_prioridades[v]
-                # print(v)
-                # print(dist)
+                v = [key for key in self.Q_prioridades if self.Q_prioridades[key] == min(self.Q_prioridades.values()) ][0]
+                S_list.append(v)
+                del self.Q_prioridades[v]
 
                 for i in range(len(self.V_Adj(v))):
 
-                    # print(self.grafo_lista[v-1][i])
-                    # print(list(self.grafo_lista[v-1][i].values())[0])
-                    index=list(self.grafo_lista[v-1][i].keys())[0]
-                    # print(index)
-                    # print(S[index-1])
-                    if S[index-1][0] == -1 or S[index-1][0] > dist + list(self.grafo_lista[v-1][i].values())[0]:
-                        # print(f" {S[index-1][0]}> {dist} + {list(self.grafo_lista[v-1][i].values())[0]} ")
-                        S[index-1] = [dist + list(self.grafo_lista[v-1][i].values())[0], v]
-                        # print(index)
-                        Q_prioridades[index]=dist + list(self.grafo_lista[v-1][i].values())[0]
-                        # print(Q_prioridades)
-            return S
+                    self.Relax(v,list(self.grafo_lista[v-1][i].keys())[0],list(self.grafo_lista[v-1][i].values())[0])
+
+            return S_list,self.pi,self.d
 
 
 class Grafo_MatrizAdj:
@@ -181,6 +174,7 @@ class Grafo_MatrizAdj:
         self.N_orientado = N_orientado
         self.Ponderado = Ponderado
 
+        self.Q_prioridades=dict()
         if Ponderado:
 
             self.grafo_ponderado = [
@@ -315,36 +309,41 @@ class Grafo_MatrizAdj:
             self.pi[i+1] = None
         self.d[s] = 0
 
-    # def Relax(self,u,v,w):
-    #     """Função que realiza o relaxamento de um vértice u até v com peso w."""
-    #     if self.d[v] > self.d[u] + w :
-    #         self.d[v] = self.d[u] + w
-    #         self.pi[v] = u
-    #         self.Q_prioridades.adiciona_no(v)
+    def Relax(self, u, v, w):
+        """Função que realiza o relaxamento de um vértice u até v com peso w."""
+
+        if self.d[v] > self.d[u] + w:
+            self.d[v] = self.d[u] + w
+            self.pi[v] = u
+            self.Q_prioridades[v]=w + self.d[u]
 
     def Dijkstra(self, s):
+        """Função que realiza o algoritmo de dijkstra iniciado pelo vértice s recebido por parâmetro.\n
+        Retorno:\n
+        tupla contendo respectivamente:\n
+        lista com o vetor S\n
+        dicionário pi com os antecessores de cada vértice\n
+        dicionário d com distâncias mínimas de s até cada vértice."""
 
         if not self.Ponderado:
             print("Dijkstra não é implementado para grafos não Ponderados!")
         else:
-            S = [[-1, 0] for i in range(self.vertices)]
-            S[s - 1] = [0, s]
-            Q_prioridades = hp.HeapMin()  # usado no Dijkstra
+            self.Inicialize_Single_Source(s)
+            S_list=list()
+            self.Q_prioridades[s]=0
 
-            Q_prioridades.adiciona_no(0, s)
-            while Q_prioridades.tamanho() > 0:
-                dist, v = Q_prioridades.remove_no()
-                for i in range(self.vertices):
-                    if self.grafo_ponderado[v-1][i] != 0:
-                        # relaxamento
-                        if S[i][0] == -1 or S[i][0] > dist + self.grafo_ponderado[v-1][i]:
-                            S[i] = [dist + self.grafo_ponderado[v-1][i], v]
-                            print(dist + self.grafo_ponderado[v-1][i], i+1)
-                            Q_prioridades.adiciona_no(dist + self.grafo_ponderado[v-1][i], i+1)
-            return S
+            while len(self.Q_prioridades) > 0:
+                #extract min -> v
+                v = [key for key in self.Q_prioridades if self.Q_prioridades[key] == min(self.Q_prioridades.values()) ][0]
+                S_list.append(v)
+                del self.Q_prioridades[v]
+                for i in self.V_Adj(v):
+                    self.Relax(v,i,self.grafo_ponderado[v-1][i-1])
+
+            return S_list,self.pi,self.d
 
 
-g = Grafo_listaAdj(7, Ponderado=True)
+g = Grafo_MatrizAdj(7, Ponderado=True)
 
 
 g.AddAresta(1, 2, 5)
