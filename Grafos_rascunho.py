@@ -1,6 +1,34 @@
 
 # Syanne Karoline Moreira Tavares - 202104940029 - API grafos
 
+"""
+Classes:
+
+Grafo_listaAdj
+Grafo_MatrizAdj
+
+"""
+# Endpoints/ métodos:
+"""
+AddAresta(u,v) -> Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro. Caso seja ponderado recebe o peso w.
+ToString -> Mostra a representação do grafo matriz de adjacencia.
+V -> Retorna o número de Vértices do Grafo.
+A-> Retorna o número de Arestas do grafo.
+V_Adj -> Retorna os vértices adjacentes a v.
+DFS -> Realiza o algoritmo DFS do grafo mostrando os vetores de distâncias e antecessores de cada vértice.
+dfs_visit ->Método auxiliar do Algoritmo DFS. Atualiza as informações do vetor.
+BFS -> Realiza o algoritmo BFS do grafo mostrando os vetores de distâncias e antecessores de cada vértice.
+Inicialize_Single_Source -> Inicializa os vetores de distâncias e antecessores para o algoritmo Dijkstra.
+Relax(u,v,w) -> Função que realiza o relaxamento de um vértice u até v com peso w.
+
+Dijkstra(s) -> Função que realiza o algoritmo de dijkstra iniciado pelo vértice s recebido por parâmetro.\n
+                Retorno:\n
+                lista  conjunto S de vértices, onde para todo v ∈ S, temos d[v] = δ(s, v).\n
+                dicionário pi com os antecessores de cada vértice\n
+                dicionário d com distâncias mínimas de s até cada vértice.
+Belman_ford(s) ->
+"""
+
 import math
 
 class Grafo_listaAdj:
@@ -10,7 +38,6 @@ class Grafo_listaAdj:
         self.N_orientado = N_orientado
         self.Ponderado = Ponderado
         self.Q_prioridades = dict()  # usado no Dijkstra
-
 
         # cria a representação lista de adjacência
         self.grafo_lista = [[] for i in range(self.vertices)]
@@ -28,10 +55,12 @@ class Grafo_listaAdj:
 
         if self.Ponderado:
             self.grafo_lista[u-1].append({v: w})
-            if self.N_orientado:
+
+            if self.N_orientado:            
                 self.grafo_lista[v-1].append({u: w})
         else:
             self.grafo_lista[u-1].append(v)
+
             if self.N_orientado:
                 self.grafo_lista[v-1].append(u)
 
@@ -45,7 +74,7 @@ class Grafo_listaAdj:
             print('')
 
     def V(self):
-        """Retorna o número de Vértices do Grafo"""
+        """Retorna o número de Vértices do Grafo."""
         return self.vertices
 
     def A(self):
@@ -71,6 +100,7 @@ class Grafo_listaAdj:
 
     def DFS(self):
 
+        """Realiza o algoritmo DFS do grafo mostrando os vetores de distâncias e antecessores de cada vértice"""
         for v in range(self.vertices):
             self.pi[v+1] = None
             self.cor[v+1] = "BRANCO"
@@ -83,6 +113,7 @@ class Grafo_listaAdj:
         print("Lista de antecessores pi[v] =", self.pi)
 
     def dfs_visit(self, u):
+        """Método auxiliar do Algoritmo DFS. Atualiza as informações do vetor alcançado"""
         self.cor[u] = "CINZA"
         self.time = self.time+1
         self.d[u] = self.time
@@ -97,7 +128,7 @@ class Grafo_listaAdj:
 
     # bfs
     def BFS(self, s):
-
+        """Realiza o algoritmo BFS do grafo mostrando os vetores de distâncias e antecessores de cada vértice."""
         for u in range(self.vertices):
             if u+1 != s:
                 self.cor[u+1] = "BRANCO"
@@ -126,7 +157,7 @@ class Grafo_listaAdj:
     ############################## Algoritmos caminhos mínimos###################################
 
     def Inicialize_Single_Source(self, s):
-        """Função que inicializa as variáveis auxiliares na execução do algoritmo de caminhos mínimo."""
+        """Inicializa os vetores de distâncias e antecessores para os Algoritmos de caminhos mínimos."""
         for i in range(self.vertices):
             self.d[i+1] = math.inf
             self.pi[i+1] = None
@@ -143,7 +174,7 @@ class Grafo_listaAdj:
     def Dijkstra(self, s):
         """Função que realiza o algoritmo de dijkstra iniciado pelo vértice s recebido por parâmetro.\n
         Retorno:\n
-        lista com o vetor S\n
+        lista  conjunto S de vértices, onde para todo v ∈ S, temos d[v] = δ(s, v).\n
         dicionário pi com os antecessores de cada vértice\n
         dicionário d com distâncias mínimas de s até cada vértice."""
 
@@ -165,7 +196,29 @@ class Grafo_listaAdj:
                     self.Relax(v,list(self.grafo_lista[v-1][i].keys())[0],list(self.grafo_lista[v-1][i].values())[0])
 
             return S_list,self.pi,self.d
+        
+    def Bellman_Ford(self,s):
+        """Realiza o aloritmo de Bellman-ford.\n
+        Retorno:
+        retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+        Caso não tenha ciclo negativo retorna uma tupla com respectivos valores:\n
+        valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+        dict d -> dicionário com os caminhos mínimos de s até cada vértice.\n
+        dict pi -> dicionário com os antecessores de cada vértice."""
 
+        self.Inicialize_Single_Source(s)
+
+        for _ in range(1,self.vertices):
+            for v in range(1,self.vertices+1):
+                for i,u in enumerate(self.V_Adj(v)):
+                    self.Relax(v,u,self.grafo_lista[v-1][i][u])
+
+        for v in range(1,self.vertices+1):
+            for i,u in enumerate(self.V_Adj(v)):
+                if self.d[v] > self.d[u] + self.grafo_lista[v-1][i][u]:
+                    print("Existe Ciclo Negativo!")
+                    return True                  
+        return False,self.d,self.pi
 
 class Grafo_MatrizAdj:
 
@@ -246,7 +299,7 @@ class Grafo_MatrizAdj:
         return vAdj
 
     def DFS(self):
-
+        """Realiza o algoritmo DFS do grafo mostrando os vetores de distâncias e antecessores de cada vértice."""
         for v in range(self.vertices):
             self.pi[v+1] = None
             self.cor[v+1] = "BRANCO"
@@ -259,6 +312,8 @@ class Grafo_MatrizAdj:
         print("Lista de antecessores pi[v] =", self.pi)
 
     def dfs_visit(self, u):
+        """Método auxiliar do Algoritmo DFS. Atualiza as informações do vetor."""
+
         self.cor[u] = "CINZA"
         self.time = self.time+1
         self.d[u] = self.time
@@ -273,7 +328,7 @@ class Grafo_MatrizAdj:
 
     # bfs
     def BFS(self, s):
-
+        """Realiza o algoritmo BFS do grafo mostrando os vetores de distâncias e antecessores."""
         for u in range(self.vertices):
             if u+1 != s:
                 self.cor[u+1] = "BRANCO"
@@ -320,8 +375,7 @@ class Grafo_MatrizAdj:
     def Dijkstra(self, s):
         """Função que realiza o algoritmo de dijkstra iniciado pelo vértice s recebido por parâmetro.\n
         Retorno:\n
-        tupla contendo respectivamente:\n
-        lista com o vetor S\n
+        lista  conjunto S de vértices, onde para todo v ∈ S, temos d[v] = δ(s, v).\n
         dicionário pi com os antecessores de cada vértice\n
         dicionário d com distâncias mínimas de s até cada vértice."""
 
@@ -342,8 +396,9 @@ class Grafo_MatrizAdj:
 
             return S_list,self.pi,self.d
 
+#Exemplo BellmanFord
 
-g = Grafo_MatrizAdj(7, Ponderado=True)
+g = Grafo_listaAdj(7, Ponderado=True)
 
 
 g.AddAresta(1, 2, 5)
@@ -360,41 +415,21 @@ g.AddAresta(6, 7, 8)
 
 g.ToString()
 
-print(g.Dijkstra(1))
-# resultado_dijkstra = g.dijkstra(1)
-# print(resultado_dijkstra)
+print(g.Bellman_Ford(1))
 
 
-# g = Grafo_listaAdj(8,True)
-# # g.ToString()
+# g = Grafo_listaAdj(4, False,Ponderado=True)
 
-# g.AddAresta(1,2)
-# g.AddAresta(1,7)
-# g.AddAresta(1,8)
-# g.AddAresta(1,6)
 
-# g.AddAresta(2,1)
-# g.AddAresta(2,8)
+# g.AddAresta(1, 2, 5)
+# g.AddAresta(1, 4, 4)
+# g.AddAresta(2, 3, 3)
+# g.AddAresta(3, 4, 2)
+# g.AddAresta(4, 2, 6)
 
-# g.AddAresta(3,4)
-# g.AddAresta(3,6)
-
-# g.AddAresta(4,5)
-
-# g.AddAresta(5,4)
-
-# g.AddAresta(6,1)
-# g.AddAresta(6,3)
-
-# g.AddAresta(7,1)
-# g.AddAresta(7,8)
-
-# g.AddAresta(8,1)
-# g.AddAresta(8,2)
-# g.AddAresta(8,7)
 
 
 # g.ToString()
+# print(g.Bellman_Ford(1))
+# print(g.Dijkstra((1))
 
-# g.DFS()
-# g.BFS(8)
