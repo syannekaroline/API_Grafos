@@ -11,29 +11,43 @@ Grafo_MatrizAdj
 # Endpoints/ métodos:
 """
 AddAresta(u,v) -> Adiciona no grafo uma aresta ligando os vértices u e v passados por parâmetro. Caso seja ponderado recebe o peso w.
+
 ToString -> Mostra a representação do grafo matriz de adjacencia.
+
 V -> Retorna o número de Vértices do Grafo.
+
 A-> Retorna o número de Arestas do grafo.
+
 V_Adj -> Retorna os vértices adjacentes a v.
+
 DFS -> Realiza o algoritmo DFS do grafo mostrando os vetores de distâncias e antecessores de cada vértice.
+
 dfs_visit ->Método auxiliar do Algoritmo DFS. Atualiza as informações do vetor.
+
 BFS -> Realiza o algoritmo BFS do grafo mostrando os vetores de distâncias e antecessores de cada vértice.
-Inicialize_Single_Source -> Inicializa os vetores de distâncias e antecessores para o algoritmo Dijkstra.
+
+Inicialize_Single_Source -> Inicializa os vetores de distâncias e antecessores para o algoritmo Dijkstra
+
 Relax(u,v,w) -> Função que realiza o relaxamento de um vértice u até v com peso w.
 
-Dijkstra(s) -> Função que realiza o algoritmo de dijkstra iniciado pelo vértice s recebido por parâmetro.\n
+Dijkstra(s) -> Função que realiza o algoritmo de dijkstra iniciado pelo vértice s recebido por parâmetro.
                 Retorno:\n
-                lista  conjunto S de vértices, onde para todo v ∈ S, temos d[v] = δ(s, v).\n
-                dicionário pi com os antecessores de cada vértice\n
+                lista  conjunto S de vértices, onde para todo v ∈ S, temos d[v] = δ(s, v).
+                dicionário pi com os antecessores de cada vértice
                 dicionário d com distâncias mínimas de s até cada vértice.
-                
-Belman_ford(s) ->  Realiza o aloritmo de Bellman-ford.\n
+
+Belman_ford(s) ->  Realiza o aloritmo de Bellman-ford.
                     Retorno:
-                    retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.\n
-                    Caso não tenha ciclo negativo retorna uma tupla com respectivos valores:\n
-                    valor boleano indicando se foi ou não encontrado ciclo negativo.\n
-                    dict d -> dicionário com os caminhos mínimos de s até cada vértice.\n
+                    retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.
+                    Caso não tenha ciclo negativo retorna uma tupla com respectivos valores:
+                    valor boleano indicando se foi ou não encontrado ciclo negativo.
+                    dict d -> dicionário com os caminhos mínimos de s até cada vértice.
                     dict pi -> dicionário com os antecessores de cada vértice.
+
+Floyd_Warshall -> Realiza o algoritmo de floyd-Warshall
+                    Retorno:
+                    FW_matriz = Matriz de caminhos mínimos entre todos os pares de vértice.
+                    self.pi = dicionários com antecessores de cada vértice.
 """
 
 import math
@@ -227,7 +241,32 @@ class Grafo_listaAdj:
                     print("Existe Ciclo Negativo!")
                     return True                  
         return False,self.d,self.pi
+    
+    def Floyd_Warshall(self):
+        """Realiza o algoritmo de floyd-Warshall\n
+        Retorno:\n
+        FW_matriz = Matriz de caminhos mínimos entre todos os pares de vértice.\n
+        self.pi = dicionários com antecessores de cada vértice."""
 
+        FW_matriz=[[0]*self.vertices for i in range(self.vertices)]
+
+        for v in range(1,self.vertices+1):
+            for w in range(1,self.vertices+1):
+                if v != w:
+                    if w in self.V_Adj(v):
+                        i = self.V_Adj(v).index(w)
+                        FW_matriz[v-1][w-1] = list(self.grafo_lista[v-1][i].values())[0]
+                    else:
+                        FW_matriz[v-1][w-1] = math.inf
+
+        for k in range(self.vertices):
+            for v in range(self.vertices):
+                for w in range(self.vertices):
+                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w] :
+                        FW_matriz[v][w] = FW_matriz[v][k] + FW_matriz[k][w]
+                        self.pi[w+1]=k+1
+        
+        return FW_matriz,self.pi
 class Grafo_MatrizAdj:
 
     def __init__(self, vertices, N_orientado=True, Ponderado=False):
@@ -238,8 +277,7 @@ class Grafo_MatrizAdj:
         self.Q_prioridades=dict()
         if Ponderado:
 
-            self.grafo_ponderado = [
-                [0]*self.vertices for i in range(self.vertices)]
+            self.grafo_ponderado = [[0]*self.vertices for i in range(self.vertices)]
 
         # cria a representação matriz de adjacência
         self.grafo_matriz = [[0]*self.vertices for i in range(self.vertices)]
@@ -429,55 +467,115 @@ class Grafo_MatrizAdj:
                     print("Existe Ciclo Negativo!")
                     return True                  
         return False,self.d,self.pi
-#Exemplo BellmanFord
+    
+    def Floyd_Warshall(self):
+        """Realiza o algoritmo de floyd-Warshall\n
+        Retorno:\n
+        FW_matriz = Matriz de caminhos mínimos entre todos os pares de vértice.\n
+        self.pi = dicionários com antecessores de cada vértice."""
 
-# Exemplo 1
+        FW_matriz=[[0]*self.vertices for i in range(self.vertices)]
 
-########### Lista de Adjacência #######################
-# g = Grafo_listaAdj(4, False,Ponderado=True)
+        for v in range(1,self.vertices+1):
+            for w in range(1,self.vertices+1):
+                if v != w:
+                    FW_matriz[v-1][w-1] = self.grafo_ponderado[v-1][w-1] if self.grafo_ponderado[v-1][w-1] != 0 else math.inf
 
-# g.AddAresta(1, 2, 5)
-# g.AddAresta(1, 4, 4)
-# g.AddAresta(2, 3, 3)
-# g.AddAresta(3, 4, 2)
-# g.AddAresta(4, 2, -6)
+        for k in range(self.vertices):
+            for v in range(self.vertices):
+                for w in range(self.vertices):
+                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w] :
+                        FW_matriz[v][w] = FW_matriz[v][k] + FW_matriz[k][w]
+                        self.pi[w+1]=k+1
+        
+        return FW_matriz,self.pi
+    
+# Exemplo 1 - Floyd-Warshall - Matrizes de adjacência
+print("{:=^60}".format("Exemplo 1 - Floyd-Warshall - Matrizes de adjacência"))
+g = Grafo_MatrizAdj(3,N_orientado=False, Ponderado=True)
 
 
-########### Matriz de Adjacência #######################
+g.AddAresta(1, 1, 2)
+g.AddAresta(1, 2, 8)
+g.AddAresta(1, 3, 5)
+g.AddAresta(2, 1, 3)
+g.AddAresta(3, 2, 2)
+
+g.ToString()
+
+Floyd_warshall,pi=g.Floyd_Warshall()
+print("Floyd-Warshall:")
+for i in Floyd_warshall:
+    print(i)
+
+print(f"pi[v] : antecessor de v = {pi}\n\n")
+
+################################################################################
+
+# Exemplo 1 - Floyd-Warshall - lista de adjacência
+
+# print("{:=^60}".format(" Exemplo 1 - Floyd-Warshall - lista de adjacência "))
+
+# g = Grafo_listaAdj(3,N_orientado=False, Ponderado=True)
+
+
+# g.AddAresta(1, 1, 2)
+# g.AddAresta(1, 2, 8)
+# g.AddAresta(1, 3, 5)
+# g.AddAresta(2, 1, 3)
+# g.AddAresta(3, 2, 2)
 
 # g.ToString()
-# print(g.Bellman_Ford(1))
 
-# g = Grafo_MatrizAdj(4, False,Ponderado=True)
+# Floyd_warshall,pi=g.Floyd_Warshall()
+# print("Floyd-Warshall:")
+# for i in Floyd_warshall:
+#     print(i)
 
-# g.AddAresta(1, 2, 5)
-# g.AddAresta(1, 4, 4)
-# g.AddAresta(2, 3, 3)
-# g.AddAresta(3, 4, 2)
-# g.AddAresta(4, 2, -6)
+# print(f"pi[v] : antecessor de v = {pi}")
 
+################################################################################
 
+# Exemplo 2 - Floyd-Warshall - lista de adjacência
+
+print("{:=^60}".format(" Exemplo 2 - Floyd-Warshall - lista de adjacência "))
+ 
+g = Grafo_listaAdj(4,N_orientado=False, Ponderado=True)
+
+g.AddAresta(1, 2, 3)
+g.AddAresta(1, 4, 7)
+g.AddAresta(2, 1, 8)
+g.AddAresta(2, 3, 2)
+g.AddAresta(3, 1, 5)
+g.AddAresta(3, 4, 1)
+g.AddAresta(4, 1, 2)
+
+g.ToString()
+
+Floyd_warshall,pi=g.Floyd_Warshall()
+print("Floyd-Warshall:")
+for i in Floyd_warshall:
+    print(i)
+print(f"pi[v] : antecessor de v = {pi}\n\n")
+
+################################################################################
+
+# print("{:=^60}".format(" Exemplo 2 - Floyd-Warshall - matriz de adjacência "))
+
+# g = Grafo_MatrizAdj(4,N_orientado=False, Ponderado=True)
+
+# g.AddAresta(1, 2, 3)
+# g.AddAresta(1, 4, 7)
+# g.AddAresta(2, 1, 8)
+# g.AddAresta(2, 3, 2)
+# g.AddAresta(3, 1, 5)
+# g.AddAresta(3, 4, 1)
+# g.AddAresta(4, 1, 2)
 
 # g.ToString()
-# print(g.Bellman_Ford(1))
 
-# Exemplo 2
-
-# g = Grafo_MatrizAdj(7, Ponderado=True)
-
-
-# g.AddAresta(1, 2, 5)
-# g.AddAresta(1, 3, 6)
-# g.AddAresta(1, 4, 10)
-# g.AddAresta(2, 5, 13)
-# g.AddAresta(3, 4, 3)
-# g.AddAresta(3, 5, 11)
-# g.AddAresta(3, 6, 6)
-# g.AddAresta(4, 5, 6)
-# g.AddAresta(4, 6, 4)
-# g.AddAresta(5, 7, 3)
-# g.AddAresta(6, 7, 8)
-
-# g.ToString()
-
-# print(g.Bellman_Ford(1))
+# Floyd_warshall,pi=g.Floyd_Warshall()
+# print("Floyd-Warshall:")
+# for i in Floyd_warshall:
+#     print(i)
+# print(f"pi[v] : antecessor de v = {pi}")
