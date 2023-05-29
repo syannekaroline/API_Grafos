@@ -26,6 +26,14 @@ Dijkstra(s) -> Função que realiza o algoritmo de dijkstra iniciado pelo vérti
                 lista  conjunto S de vértices, onde para todo v ∈ S, temos d[v] = δ(s, v).\n
                 dicionário pi com os antecessores de cada vértice\n
                 dicionário d com distâncias mínimas de s até cada vértice.
+                
+Belman_ford(s) ->  Realiza o aloritmo de Bellman-ford.\n
+                    Retorno:
+                    retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+                    Caso não tenha ciclo negativo retorna uma tupla com respectivos valores:\n
+                    valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+                    dict d -> dicionário com os caminhos mínimos de s até cada vértice.\n
+                    dict pi -> dicionário com os antecessores de cada vértice.
 """
 
 import math
@@ -37,7 +45,6 @@ class Grafo_listaAdj:
         self.N_orientado = N_orientado
         self.Ponderado = Ponderado
         self.Q_prioridades = dict()  # usado no Dijkstra
-
 
         # cria a representação lista de adjacência
         self.grafo_lista = [[] for i in range(self.vertices)]
@@ -55,10 +62,12 @@ class Grafo_listaAdj:
 
         if self.Ponderado:
             self.grafo_lista[u-1].append({v: w})
-            if self.N_orientado:
+
+            if self.N_orientado:            
                 self.grafo_lista[v-1].append({u: w})
         else:
             self.grafo_lista[u-1].append(v)
+
             if self.N_orientado:
                 self.grafo_lista[v-1].append(u)
 
@@ -155,7 +164,7 @@ class Grafo_listaAdj:
     ############################## Algoritmos caminhos mínimos###################################
 
     def Inicialize_Single_Source(self, s):
-        """Inicializa os vetores de distâncias e antecessores para o algoritmo Dijkstra."""
+        """Inicializa os vetores de distâncias e antecessores para os Algoritmos de caminhos mínimos."""
         for i in range(self.vertices):
             self.d[i+1] = math.inf
             self.pi[i+1] = None
@@ -194,7 +203,30 @@ class Grafo_listaAdj:
                     self.Relax(v,list(self.grafo_lista[v-1][i].keys())[0],list(self.grafo_lista[v-1][i].values())[0])
 
             return S_list,self.pi,self.d
+        
+    def Bellman_Ford(self,s):
+        """Realiza o aloritmo de Bellman-ford.\n
+        Retorno:
+        retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+        Caso não tenha ciclo negativo retorna uma tupla com respectivos valores:\n
+        valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+        dict d -> dicionário com os caminhos mínimos de s até cada vértice.\n
+        dict pi -> dicionário com os antecessores de cada vértice."""
 
+        self.Inicialize_Single_Source(s)
+
+        for _ in range(1,self.vertices):
+            for v in range(1,self.vertices+1):
+                for i,u in enumerate(self.V_Adj(v)):
+                    self.Relax(v,u,self.grafo_lista[v-1][i][u])
+
+        for u in range(1,self.vertices+1):
+            for i,v in enumerate(self.V_Adj(u)):
+                # print(f"{self.d[v] } > {self.d[u]} + w({u},{v}-> {self.grafo_lista[u-1][i][v]}) ")
+                if self.d[v] > self.d[u] + self.grafo_lista[u-1][i][v]:
+                    print("Existe Ciclo Negativo!")
+                    return True                  
+        return False,self.d,self.pi
 
 class Grafo_MatrizAdj:
 
@@ -232,9 +264,9 @@ class Grafo_MatrizAdj:
             self.grafo_matriz[v-1][u-1] = 1
 
         if self.Ponderado:
-            self.grafo_ponderado[v-1][u-1] = w
+            self.grafo_ponderado[u-1][v-1] = w
             if self.N_orientado:
-                self.grafo_ponderado[u-1][v-1] = w
+                self.grafo_ponderado[v-1][u-1] = w
 
     def ToString(self):
         """Mostra a representação do grafo em matriz de adjacência"""
@@ -371,8 +403,65 @@ class Grafo_MatrizAdj:
                     self.Relax(v,i,self.grafo_ponderado[v-1][i-1])
 
             return S_list,self.pi,self.d
+        
+    def Bellman_Ford(self,s):
+        """Realiza o aloritmo de Bellman-ford.\n
+        Retorno:
+        retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+        Caso não tenha ciclo negativo retorna uma tupla com respectivos valores:\n
+        valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+        dict d -> dicionário com os caminhos mínimos de s até cada vértice.\n
+        dict pi -> dicionário com os antecessores de cada vértice."""
 
-#Exemplo Dijkstra
+        self.Inicialize_Single_Source(s)
+
+        for _ in range(1,self.vertices):
+            for v in range(1,self.vertices+1):
+                for i in self.V_Adj(v):
+
+                    self.Relax(v,i,self.grafo_ponderado[v-1][i-1])
+
+        for u in range(1,self.vertices+1):
+            for v in self.V_Adj(u):
+                # print(f"{self.d[v] } > {self.d[u]} + w({u},{v}-> {self.grafo_ponderado[u-1][v-1]}) ")
+
+                if self.d[v] > self.d[u] + self.grafo_ponderado[u-1][v-1]:
+                    print("Existe Ciclo Negativo!")
+                    return True                  
+        return False,self.d,self.pi
+#Exemplo BellmanFord
+
+# Exemplo 1
+
+########### Lista de Adjacência #######################
+# g = Grafo_listaAdj(4, False,Ponderado=True)
+
+# g.AddAresta(1, 2, 5)
+# g.AddAresta(1, 4, 4)
+# g.AddAresta(2, 3, 3)
+# g.AddAresta(3, 4, 2)
+# g.AddAresta(4, 2, -6)
+
+
+########### Matriz de Adjacência #######################
+
+# g.ToString()
+# print(g.Bellman_Ford(1))
+
+# g = Grafo_MatrizAdj(4, False,Ponderado=True)
+
+# g.AddAresta(1, 2, 5)
+# g.AddAresta(1, 4, 4)
+# g.AddAresta(2, 3, 3)
+# g.AddAresta(3, 4, 2)
+# g.AddAresta(4, 2, -6)
+
+
+
+# g.ToString()
+# print(g.Bellman_Ford(1))
+
+# Exemplo 2
 
 # g = Grafo_MatrizAdj(7, Ponderado=True)
 
@@ -391,5 +480,4 @@ class Grafo_MatrizAdj:
 
 # g.ToString()
 
-# print(g.Dijkstra(1))
-
+# print(g.Bellman_Ford(1))

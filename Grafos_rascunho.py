@@ -26,7 +26,14 @@ Dijkstra(s) -> Função que realiza o algoritmo de dijkstra iniciado pelo vérti
                 lista  conjunto S de vértices, onde para todo v ∈ S, temos d[v] = δ(s, v).\n
                 dicionário pi com os antecessores de cada vértice\n
                 dicionário d com distâncias mínimas de s até cada vértice.
-Belman_ford(s) ->
+                
+Belman_ford(s) ->  Realiza o aloritmo de Bellman-ford.\n
+                    Retorno:
+                    retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+                    Caso não tenha ciclo negativo retorna uma tupla com respectivos valores:\n
+                    valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+                    dict d -> dicionário com os caminhos mínimos de s até cada vértice.\n
+                    dict pi -> dicionário com os antecessores de cada vértice.
 """
 
 import math
@@ -213,9 +220,10 @@ class Grafo_listaAdj:
                 for i,u in enumerate(self.V_Adj(v)):
                     self.Relax(v,u,self.grafo_lista[v-1][i][u])
 
-        for v in range(1,self.vertices+1):
-            for i,u in enumerate(self.V_Adj(v)):
-                if self.d[v] > self.d[u] + self.grafo_lista[v-1][i][u]:
+        for u in range(1,self.vertices+1):
+            for i,v in enumerate(self.V_Adj(u)):
+                # print(f"{self.d[v] } > {self.d[u]} + w({u},{v}-> {self.grafo_lista[u-1][i][v]}) ")
+                if self.d[v] > self.d[u] + self.grafo_lista[u-1][i][v]:
                     print("Existe Ciclo Negativo!")
                     return True                  
         return False,self.d,self.pi
@@ -256,9 +264,9 @@ class Grafo_MatrizAdj:
             self.grafo_matriz[v-1][u-1] = 1
 
         if self.Ponderado:
-            self.grafo_ponderado[v-1][u-1] = w
+            self.grafo_ponderado[u-1][v-1] = w
             if self.N_orientado:
-                self.grafo_ponderado[u-1][v-1] = w
+                self.grafo_ponderado[v-1][u-1] = w
 
     def ToString(self):
         """Mostra a representação do grafo em matriz de adjacência"""
@@ -395,41 +403,81 @@ class Grafo_MatrizAdj:
                     self.Relax(v,i,self.grafo_ponderado[v-1][i-1])
 
             return S_list,self.pi,self.d
+        
+    def Bellman_Ford(self,s):
+        """Realiza o aloritmo de Bellman-ford.\n
+        Retorno:
+        retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+        Caso não tenha ciclo negativo retorna uma tupla com respectivos valores:\n
+        valor boleano indicando se foi ou não encontrado ciclo negativo.\n
+        dict d -> dicionário com os caminhos mínimos de s até cada vértice.\n
+        dict pi -> dicionário com os antecessores de cada vértice."""
 
+        self.Inicialize_Single_Source(s)
+
+        for _ in range(1,self.vertices):
+            for v in range(1,self.vertices+1):
+                for i in self.V_Adj(v):
+
+                    self.Relax(v,i,self.grafo_ponderado[v-1][i-1])
+
+        for u in range(1,self.vertices+1):
+            for v in self.V_Adj(u):
+                # print(f"{self.d[v] } > {self.d[u]} + w({u},{v}-> {self.grafo_ponderado[u-1][v-1]}) ")
+
+                if self.d[v] > self.d[u] + self.grafo_ponderado[u-1][v-1]:
+                    print("Existe Ciclo Negativo!")
+                    return True                  
+        return False,self.d,self.pi
 #Exemplo BellmanFord
 
-g = Grafo_listaAdj(7, Ponderado=True)
+# Exemplo 1
 
-
-g.AddAresta(1, 2, 5)
-g.AddAresta(1, 3, 6)
-g.AddAresta(1, 4, 10)
-g.AddAresta(2, 5, 13)
-g.AddAresta(3, 4, 3)
-g.AddAresta(3, 5, 11)
-g.AddAresta(3, 6, 6)
-g.AddAresta(4, 5, 6)
-g.AddAresta(4, 6, 4)
-g.AddAresta(5, 7, 3)
-g.AddAresta(6, 7, 8)
-
-g.ToString()
-
-print(g.Bellman_Ford(1))
-
-
+########### Lista de Adjacência #######################
 # g = Grafo_listaAdj(4, False,Ponderado=True)
-
 
 # g.AddAresta(1, 2, 5)
 # g.AddAresta(1, 4, 4)
 # g.AddAresta(2, 3, 3)
 # g.AddAresta(3, 4, 2)
-# g.AddAresta(4, 2, 6)
+# g.AddAresta(4, 2, -6)
+
+
+########### Matriz de Adjacência #######################
+
+# g.ToString()
+# print(g.Bellman_Ford(1))
+
+# g = Grafo_MatrizAdj(4, False,Ponderado=True)
+
+# g.AddAresta(1, 2, 5)
+# g.AddAresta(1, 4, 4)
+# g.AddAresta(2, 3, 3)
+# g.AddAresta(3, 4, 2)
+# g.AddAresta(4, 2, -6)
 
 
 
 # g.ToString()
 # print(g.Bellman_Ford(1))
-# print(g.Dijkstra((1))
 
+# Exemplo 2
+
+# g = Grafo_MatrizAdj(7, Ponderado=True)
+
+
+# g.AddAresta(1, 2, 5)
+# g.AddAresta(1, 3, 6)
+# g.AddAresta(1, 4, 10)
+# g.AddAresta(2, 5, 13)
+# g.AddAresta(3, 4, 3)
+# g.AddAresta(3, 5, 11)
+# g.AddAresta(3, 6, 6)
+# g.AddAresta(4, 5, 6)
+# g.AddAresta(4, 6, 4)
+# g.AddAresta(5, 7, 3)
+# g.AddAresta(6, 7, 8)
+
+# g.ToString()
+
+# print(g.Bellman_Ford(1))
