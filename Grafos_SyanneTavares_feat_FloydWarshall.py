@@ -246,27 +246,31 @@ class Grafo_listaAdj:
         """Realiza o algoritmo de floyd-Warshall\n
         Retorno:\n
         FW_matriz = Matriz de caminhos mínimos entre todos os pares de vértice.\n
-        self.pi = dicionários com antecessores de cada vértice."""
+        self.pi = matriz com antecessores de cada vértice."""
 
-        FW_matriz=[[0]*self.vertices for i in range(self.vertices)]
+        FW_matriz = [[0]*self.vertices for i in range(self.vertices)]
+        self.pi = [[None]*self.V() for i in range(self.V())]
 
-        for v in range(1,self.vertices+1):
-            for w in range(1,self.vertices+1):
+        for v in range(1, self.vertices+1):
+            for w in range(1, self.vertices+1):
                 if v != w:
                     if w in self.V_Adj(v):
                         i = self.V_Adj(v).index(w)
-                        FW_matriz[v-1][w-1] = list(self.grafo_lista[v-1][i].values())[0]
+                        FW_matriz[v-1][w -1] = list(self.grafo_lista[v-1][i].values())[0]
+                        self.pi[v-1][w-1] = v
                     else:
                         FW_matriz[v-1][w-1] = math.inf
 
         for k in range(self.vertices):
             for v in range(self.vertices):
                 for w in range(self.vertices):
-                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w] :
+                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w]:
                         FW_matriz[v][w] = FW_matriz[v][k] + FW_matriz[k][w]
-                        self.pi[w+1]=k+1
-        
-        return FW_matriz,self.pi
+                        self.pi[v][w] = self.pi[k][w]
+
+        return FW_matriz, self.pi
+
+
 class Grafo_MatrizAdj:
 
     def __init__(self, vertices, N_orientado=True, Ponderado=False):
@@ -472,23 +476,26 @@ class Grafo_MatrizAdj:
         """Realiza o algoritmo de floyd-Warshall\n
         Retorno:\n
         FW_matriz = Matriz de caminhos mínimos entre todos os pares de vértice.\n
-        self.pi = dicionários com antecessores de cada vértice."""
+        self.pi = Matriz com antecessores de cada vértice."""
 
-        FW_matriz=[[0]*self.vertices for i in range(self.vertices)]
+        FW_matriz = [[0]*self.vertices for i in range(self.vertices)]
+        self.pi = [[None]*self.V() for i in range(self.V())]
 
-        for v in range(1,self.vertices+1):
-            for w in range(1,self.vertices+1):
+        for v in range(1, self.vertices+1):
+            for w in range(1, self.vertices+1):
                 if v != w:
-                    FW_matriz[v-1][w-1] = self.grafo_ponderado[v-1][w-1] if self.grafo_ponderado[v-1][w-1] != 0 else math.inf
+                    FW_matriz[v-1][w-1] = self.grafo_ponderado[v-1][w -1] if self.grafo_ponderado[v-1][w-1] != 0 else math.inf
+                    self.pi[v-1][w-1] = v
 
         for k in range(self.vertices):
             for v in range(self.vertices):
                 for w in range(self.vertices):
-                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w] :
+                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w]:
                         FW_matriz[v][w] = FW_matriz[v][k] + FW_matriz[k][w]
-                        self.pi[w+1]=k+1
-        
-        return FW_matriz,self.pi
+                        self.pi[v][w] = self.pi[k][w]
+
+        return FW_matriz, self.pi
+    
     
 # Exemplo 1 - Floyd-Warshall - Matrizes de adjacência
 print("{:=^60}".format("Exemplo 1 - Floyd-Warshall - Matrizes de adjacência"))
@@ -508,33 +515,10 @@ print("Floyd-Warshall:")
 for i in Floyd_warshall:
     print(i)
 
-print(f"pi[v] : antecessor de v = {pi}\n\n")
-
-################################################################################
-
-# Exemplo 1 - Floyd-Warshall - lista de adjacência
-
-# print("{:=^60}".format(" Exemplo 1 - Floyd-Warshall - lista de adjacência "))
-
-# g = Grafo_listaAdj(3,N_orientado=False, Ponderado=True)
-
-
-# g.AddAresta(1, 1, 2)
-# g.AddAresta(1, 2, 8)
-# g.AddAresta(1, 3, 5)
-# g.AddAresta(2, 1, 3)
-# g.AddAresta(3, 2, 2)
-
-# g.ToString()
-
-# Floyd_warshall,pi=g.Floyd_Warshall()
-# print("Floyd-Warshall:")
-# for i in Floyd_warshall:
-#     print(i)
-
-# print(f"pi[v] : antecessor de v = {pi}")
-
-################################################################################
+print(f"Matriz de antecessores")
+for i in pi:
+    print(i)
+###############################################################################
 
 # Exemplo 2 - Floyd-Warshall - lista de adjacência
 
@@ -556,7 +540,11 @@ Floyd_warshall,pi=g.Floyd_Warshall()
 print("Floyd-Warshall:")
 for i in Floyd_warshall:
     print(i)
-print(f"pi[v] : antecessor de v = {pi}\n\n")
+
+print(f"Matriz de antecessores")
+for i in pi:
+    print(i)
+#################
 
 ################################################################################
 
@@ -578,4 +566,8 @@ print(f"pi[v] : antecessor de v = {pi}\n\n")
 # print("Floyd-Warshall:")
 # for i in Floyd_warshall:
 #     print(i)
-# print(f"pi[v] : antecessor de v = {pi}")
+
+# print(f"Matriz de antecessores")
+# for i in pi:
+#     print(i)
+# #################

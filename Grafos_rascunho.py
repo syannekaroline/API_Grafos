@@ -50,8 +50,10 @@ Floyd_Warshall -> Realiza o algoritmo de floyd-Warshall
                     self.pi = dicionários com antecessores de cada vértice.
 """
 
-import math
 
+
+
+import math
 class Grafo_listaAdj:
 
     def __init__(self, vertices, N_orientado=True, Ponderado=False):
@@ -76,13 +78,12 @@ class Grafo_listaAdj:
 
         if self.Ponderado:
             self.grafo_lista[u-1].append({v: w})
-
-            if self.N_orientado:            
+            if self.N_orientado:
                 self.grafo_lista[v-1].append({u: w})
-        else:
+        elif v not in self.grafo_lista[u-1]:
             self.grafo_lista[u-1].append(v)
 
-            if self.N_orientado:
+            if self.N_orientado and (u not in self.grafo_lista[v-1]):
                 self.grafo_lista[v-1].append(u)
 
     def ToString(self):
@@ -120,7 +121,6 @@ class Grafo_listaAdj:
         return self.grafo_lista[v-1]
 
     def DFS(self):
-
         """Realiza o algoritmo DFS do grafo mostrando os vetores de distâncias e antecessores de cada vértice"""
         for v in range(self.vertices):
             self.pi[v+1] = None
@@ -190,7 +190,7 @@ class Grafo_listaAdj:
         if self.d[v] > self.d[u] + w:
             self.d[v] = self.d[u] + w
             self.pi[v] = u
-            self.Q_prioridades[v]=w + self.d[u]
+            self.Q_prioridades[v] = w + self.d[u]
 
     def Dijkstra(self, s):
         """Função que realiza o algoritmo de dijkstra iniciado pelo vértice s recebido por parâmetro.\n
@@ -202,23 +202,25 @@ class Grafo_listaAdj:
         if not self.Ponderado:
             print("Dijkstra não é implementado para grafos não Ponderados!")
         else:
-            S_list=list()
+            S_list = list()
             self.Inicialize_Single_Source(s)
-            self.Q_prioridades[s]=0
+            self.Q_prioridades[s] = 0
 
             while len(self.Q_prioridades) > 0:
-                #ExtractMin -> v
-                v = [key for key in self.Q_prioridades if self.Q_prioridades[key] == min(self.Q_prioridades.values()) ][0]
+                # ExtractMin -> v
+                v = [key for key in self.Q_prioridades if self.Q_prioridades[key] == min(
+                    self.Q_prioridades.values())][0]
                 S_list.append(v)
                 del self.Q_prioridades[v]
 
                 for i in range(len(self.V_Adj(v))):
 
-                    self.Relax(v,list(self.grafo_lista[v-1][i].keys())[0],list(self.grafo_lista[v-1][i].values())[0])
+                    self.Relax(v, list(
+                        self.grafo_lista[v-1][i].keys())[0], list(self.grafo_lista[v-1][i].values())[0])
 
-            return S_list,self.pi,self.d
-        
-    def Bellman_Ford(self,s):
+            return S_list, self.pi, self.d
+
+    def Bellman_Ford(self, s):
         """Realiza o aloritmo de Bellman-ford.\n
         Retorno:
         retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.\n
@@ -229,44 +231,75 @@ class Grafo_listaAdj:
 
         self.Inicialize_Single_Source(s)
 
-        for _ in range(1,self.vertices):
-            for v in range(1,self.vertices+1):
-                for i,u in enumerate(self.V_Adj(v)):
-                    self.Relax(v,u,self.grafo_lista[v-1][i][u])
+        for _ in range(1, self.vertices):
+            for v in range(1, self.vertices+1):
+                for i, u in enumerate(self.V_Adj(v)):
+                    self.Relax(v, u, self.grafo_lista[v-1][i][u])
 
-        for u in range(1,self.vertices+1):
-            for i,v in enumerate(self.V_Adj(u)):
+        for u in range(1, self.vertices+1):
+            for i, v in enumerate(self.V_Adj(u)):
                 # print(f"{self.d[v] } > {self.d[u]} + w({u},{v}-> {self.grafo_lista[u-1][i][v]}) ")
                 if self.d[v] > self.d[u] + self.grafo_lista[u-1][i][v]:
                     print("Existe Ciclo Negativo!")
-                    return True                  
-        return False,self.d,self.pi
-    
+                    return True
+        return False, self.d, self.pi
+
     def Floyd_Warshall(self):
         """Realiza o algoritmo de floyd-Warshall\n
         Retorno:\n
         FW_matriz = Matriz de caminhos mínimos entre todos os pares de vértice.\n
-        self.pi = dicionários com antecessores de cada vértice."""
+        self.pi = Matriz com antecessores de cada vértice."""
 
-        FW_matriz=[[0]*self.vertices for i in range(self.vertices)]
+        FW_matriz = [[0]*self.vertices for i in range(self.vertices)]
+        self.pi = [[None]*self.V() for i in range(self.V())]
 
-        for v in range(1,self.vertices+1):
-            for w in range(1,self.vertices+1):
+        for v in range(1, self.vertices+1):
+            for w in range(1, self.vertices+1):
                 if v != w:
                     if w in self.V_Adj(v):
                         i = self.V_Adj(v).index(w)
-                        FW_matriz[v-1][w-1] = list(self.grafo_lista[v-1][i].values())[0]
+                        FW_matriz[v-1][w -1] = list(self.grafo_lista[v-1][i].values())[0]
+                        self.pi[v-1][w-1] = v
                     else:
                         FW_matriz[v-1][w-1] = math.inf
 
         for k in range(self.vertices):
             for v in range(self.vertices):
                 for w in range(self.vertices):
-                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w] :
+                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w]:
                         FW_matriz[v][w] = FW_matriz[v][k] + FW_matriz[k][w]
-                        self.pi[w+1]=k+1
-        
-        return FW_matriz,self.pi
+                        self.pi[v+1][w+1] = self.pi[k-1][w-1]
+
+        return FW_matriz, self.pi
+
+    def Encontrar_Componentes_conectados(self):
+        """Algoritmos pra encontrar os componentes conectados com auxilio do BFS adaptado.\n
+            Retorna um dicionário onde a chave é o id do componente e o valor são com componentes conectados."""
+
+        Componentes_Conectados = dict()
+        visitados = set()  # Conjunto de vertices visitados pelo DFS
+        count = 0  # Contador de componentes conectados
+
+        def DFS(vertice, componente):
+            """Algoritmo DFS chamado recursivamente"""
+            visitados.add(
+                vertice)  # adiciona o atual vertice no conjunto dos visitados
+            componente.append(vertice)
+            for adj in self.V_Adj(vertice):
+                if adj not in visitados:
+                    DFS(adj, componente)
+
+        for vertice in range(1, self.vertices+1):
+            id_componente = count
+            if vertice not in visitados:
+                count += 1
+                componentes = []
+                DFS(vertice, componentes)
+                Componentes_Conectados[id_componente] = componentes
+
+        return Componentes_Conectados
+
+
 class Grafo_MatrizAdj:
 
     def __init__(self, vertices, N_orientado=True, Ponderado=False):
@@ -274,10 +307,11 @@ class Grafo_MatrizAdj:
         self.N_orientado = N_orientado
         self.Ponderado = Ponderado
 
-        self.Q_prioridades=dict()
+        self.Q_prioridades = dict()
         if Ponderado:
 
-            self.grafo_ponderado = [[0]*self.vertices for i in range(self.vertices)]
+            self.grafo_ponderado = [
+                [0]*self.vertices for i in range(self.vertices)]
 
         # cria a representação matriz de adjacência
         self.grafo_matriz = [[0]*self.vertices for i in range(self.vertices)]
@@ -416,7 +450,7 @@ class Grafo_MatrizAdj:
         if self.d[v] > self.d[u] + w:
             self.d[v] = self.d[u] + w
             self.pi[v] = u
-            self.Q_prioridades[v]=w + self.d[u]
+            self.Q_prioridades[v] = w + self.d[u]
 
     def Dijkstra(self, s):
         """Função que realiza o algoritmo de dijkstra iniciado pelo vértice s recebido por parâmetro.\n
@@ -429,20 +463,21 @@ class Grafo_MatrizAdj:
             print("Dijkstra não é implementado para grafos não Ponderados!")
         else:
             self.Inicialize_Single_Source(s)
-            S_list=list()
-            self.Q_prioridades[s]=0
+            S_list = list()
+            self.Q_prioridades[s] = 0
 
             while len(self.Q_prioridades) > 0:
-                #extract min -> v
-                v = [key for key in self.Q_prioridades if self.Q_prioridades[key] == min(self.Q_prioridades.values()) ][0]
+                # extract min -> v
+                v = [key for key in self.Q_prioridades if self.Q_prioridades[key] == min(
+                    self.Q_prioridades.values())][0]
                 S_list.append(v)
                 del self.Q_prioridades[v]
                 for i in self.V_Adj(v):
-                    self.Relax(v,i,self.grafo_ponderado[v-1][i-1])
+                    self.Relax(v, i, self.grafo_ponderado[v-1][i-1])
 
-            return S_list,self.pi,self.d
-        
-    def Bellman_Ford(self,s):
+            return S_list, self.pi, self.d
+
+    def Bellman_Ford(self, s):
         """Realiza o aloritmo de Bellman-ford.\n
         Retorno:
         retorna o valor boleano indicando se foi ou não encontrado ciclo negativo.\n
@@ -453,129 +488,109 @@ class Grafo_MatrizAdj:
 
         self.Inicialize_Single_Source(s)
 
-        for _ in range(1,self.vertices):
-            for v in range(1,self.vertices+1):
+        for _ in range(1, self.vertices):
+            for v in range(1, self.vertices+1):
                 for i in self.V_Adj(v):
 
-                    self.Relax(v,i,self.grafo_ponderado[v-1][i-1])
+                    self.Relax(v, i, self.grafo_ponderado[v-1][i-1])
 
-        for u in range(1,self.vertices+1):
+        for u in range(1, self.vertices+1):
             for v in self.V_Adj(u):
                 # print(f"{self.d[v] } > {self.d[u]} + w({u},{v}-> {self.grafo_ponderado[u-1][v-1]}) ")
 
                 if self.d[v] > self.d[u] + self.grafo_ponderado[u-1][v-1]:
                     print("Existe Ciclo Negativo!")
-                    return True                  
-        return False,self.d,self.pi
-    
+                    return True
+        return False, self.d, self.pi
+
     def Floyd_Warshall(self):
         """Realiza o algoritmo de floyd-Warshall\n
         Retorno:\n
         FW_matriz = Matriz de caminhos mínimos entre todos os pares de vértice.\n
         self.pi = dicionários com antecessores de cada vértice."""
 
-        FW_matriz=[[0]*self.vertices for i in range(self.vertices)]
+        FW_matriz = [[0]*self.vertices for i in range(self.vertices)]
+        self.pi = [[None]*self.V() for i in range(self.V())]
 
-        for v in range(1,self.vertices+1):
-            for w in range(1,self.vertices+1):
+        for v in range(1, self.vertices+1):
+            for w in range(1, self.vertices+1):
                 if v != w:
-                    FW_matriz[v-1][w-1] = self.grafo_ponderado[v-1][w-1] if self.grafo_ponderado[v-1][w-1] != 0 else math.inf
+                    FW_matriz[v-1][w-1] = self.grafo_ponderado[v-1][w -1] if self.grafo_ponderado[v-1][w-1] != 0 else math.inf
+                    self.pi[v-1][w-1] = v
 
         for k in range(self.vertices):
             for v in range(self.vertices):
                 for w in range(self.vertices):
-                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w] :
+                    if FW_matriz[v][k] + FW_matriz[k][w] < FW_matriz[v][w]:
                         FW_matriz[v][w] = FW_matriz[v][k] + FW_matriz[k][w]
-                        self.pi[w+1]=k+1
-        
-        return FW_matriz,self.pi
-    
-# Exemplo 1 - Floyd-Warshall - Matrizes de adjacência
-print("{:=^60}".format("Exemplo 1 - Floyd-Warshall - Matrizes de adjacência"))
-g = Grafo_MatrizAdj(3,N_orientado=False, Ponderado=True)
+                        self.pi[v+1][w+1] = self.pi[k-1][w-1]
 
+        return FW_matriz, self.pi
 
-g.AddAresta(1, 1, 2)
-g.AddAresta(1, 2, 8)
-g.AddAresta(1, 3, 5)
-g.AddAresta(2, 1, 3)
-g.AddAresta(3, 2, 2)
+    def Encontrar_Componentes_conectados(self):
+        """Algoritmos pra encontrar os componentes conectados com auxilio do BFS adaptado.\n
+            Retorna um dicionário onde a chave é o id do componente e o valor são com componentes conectados."""
 
-g.ToString()
+        Componentes_Conectados = dict()
+        visitados = set()  # Conjunto de vertices visitados pelo DFS
+        count = 0  # Contador de componentes conectados
 
-Floyd_warshall,pi=g.Floyd_Warshall()
-print("Floyd-Warshall:")
-for i in Floyd_warshall:
-    print(i)
+        def DFS(vertice, componente):
+            """Algoritmo DFS chamado recursivamente"""
+            visitados.add(
+                vertice)  # adiciona o atual vertice no conjunto dos visitados
+            componente.append(vertice)
+            for adj in self.V_Adj(vertice):
+                if adj not in visitados:
+                    DFS(adj, componente)
 
-print(f"pi[v] : antecessor de v = {pi}\n\n")
+        for vertice in range(1, self.vertices+1):
+            id_componente = count
+            if vertice not in visitados:
+                count += 1
+                componentes = []
+                DFS(vertice, componentes)
+                Componentes_Conectados[id_componente] = componentes
 
-################################################################################
+        return Componentes_Conectados
 
-# Exemplo 1 - Floyd-Warshall - lista de adjacência
+# Exemplo - Encontrar componentes conectados - Matrizes de adjacência
 
-# print("{:=^60}".format(" Exemplo 1 - Floyd-Warshall - lista de adjacência "))
+print("{:=^60}".format("Exemplo 1 - Componentes Conectados - Matrizes de adjacência"))
+g = Grafo_MatrizAdj(5)
 
-# g = Grafo_listaAdj(3,N_orientado=False, Ponderado=True)
-
-
-# g.AddAresta(1, 1, 2)
-# g.AddAresta(1, 2, 8)
-# g.AddAresta(1, 3, 5)
-# g.AddAresta(2, 1, 3)
-# g.AddAresta(3, 2, 2)
-
-# g.ToString()
-
-# Floyd_warshall,pi=g.Floyd_Warshall()
-# print("Floyd-Warshall:")
-# for i in Floyd_warshall:
-#     print(i)
-
-# print(f"pi[v] : antecessor de v = {pi}")
-
-################################################################################
-
-# Exemplo 2 - Floyd-Warshall - lista de adjacência
-
-print("{:=^60}".format(" Exemplo 2 - Floyd-Warshall - lista de adjacência "))
- 
-g = Grafo_listaAdj(4,N_orientado=False, Ponderado=True)
-
-g.AddAresta(1, 2, 3)
-g.AddAresta(1, 4, 7)
-g.AddAresta(2, 1, 8)
-g.AddAresta(2, 3, 2)
-g.AddAresta(3, 1, 5)
-g.AddAresta(3, 4, 1)
-g.AddAresta(4, 1, 2)
+g.AddAresta(1, 3)
+g.AddAresta(1, 4)
+g.AddAresta(2, 5)
+g.AddAresta(3, 4)
+g.AddAresta(5, 2)
 
 g.ToString()
 
-Floyd_warshall,pi=g.Floyd_Warshall()
-print("Floyd-Warshall:")
-for i in Floyd_warshall:
-    print(i)
-print(f"pi[v] : antecessor de v = {pi}\n\n")
+print("Componentes conectados por id :",g.Encontrar_Componentes_conectados(),"\n")
 
-################################################################################
+# Exemplo - Encontrar componentes conectados - Matrizes de adjacência
 
-# print("{:=^60}".format(" Exemplo 2 - Floyd-Warshall - matriz de adjacência "))
 
-# g = Grafo_MatrizAdj(4,N_orientado=False, Ponderado=True)
+print("{:=^60}".format("Exemplo 2 - Componentes Conectados - Lista de adjacência"))
 
-# g.AddAresta(1, 2, 3)
-# g.AddAresta(1, 4, 7)
-# g.AddAresta(2, 1, 8)
-# g.AddAresta(2, 3, 2)
-# g.AddAresta(3, 1, 5)
-# g.AddAresta(3, 4, 1)
-# g.AddAresta(4, 1, 2)
+g = Grafo_listaAdj(13)
 
-# g.ToString()
+g.AddAresta(1, 2)
+g.AddAresta(1, 3)
+g.AddAresta(1, 7)
+g.AddAresta(1, 6)
+g.AddAresta(7, 5)
+g.AddAresta(5, 4)
+g.AddAresta(4, 6)
 
-# Floyd_warshall,pi=g.Floyd_Warshall()
-# print("Floyd-Warshall:")
-# for i in Floyd_warshall:
-#     print(i)
-# print(f"pi[v] : antecessor de v = {pi}")
+g.AddAresta(8, 9)
+
+g.AddAresta(10, 11)
+g.AddAresta(10, 12)
+g.AddAresta(10, 13)
+g.AddAresta(12, 13)
+
+g.ToString()
+
+print("\nComponentes conectados por id :",g.Encontrar_Componentes_conectados(),"\n")
