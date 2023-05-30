@@ -48,10 +48,9 @@ Floyd_Warshall -> Realiza o algoritmo de floyd-Warshall
                     Retorno:
                     FW_matriz = Matriz de caminhos mínimos entre todos os pares de vértice.
                     self.pi = dicionários com antecessores de cada vértice.
+Encontrar_Componentes_Conectados- > Algoritmos pra encontrar os componentes conectados com auxilio do BFS adaptado.\n
+                                Retorna um dicionário onde a chave é o id do componente e o valor são com componentes conectados.                    
 """
-
-
-
 
 import math
 class Grafo_listaAdj:
