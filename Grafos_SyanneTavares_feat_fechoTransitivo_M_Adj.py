@@ -57,7 +57,6 @@ FechoTransitivo_Warshall-> Método que aplica o Alg. de Warshall para retornar o
 
 
 import math
-import numpy as np
 
 class Grafo_MatrizAdj:
 
@@ -76,8 +75,6 @@ class Grafo_MatrizAdj:
 
         # cria a representação matriz de adjacência
         self.grafo_matriz = [[0]*self.vertices for i in range(self.vertices)]
-        self.grafo_boleano = [
-            [False]*self.vertices for i in range(self.vertices)]
 
         # DFS
         self.pi = dict()
@@ -94,12 +91,9 @@ class Grafo_MatrizAdj:
 
         # trocar = por += ser for grafo múltiplo
         self.grafo_matriz[u-1][v-1] = 1
-        self.grafo_boleano[u-1][v-1] = True
         if self.N_orientado:
             # (caso o grafo não seja direcionado)
             self.grafo_matriz[v-1][u-1] = 1
-            self.grafo_boleano[u-1][v-1] = True
-
         if self.Ponderado:
             self.grafo_ponderado[u-1][v-1] = w
             if self.N_orientado:
@@ -256,7 +250,6 @@ class Grafo_MatrizAdj:
         for _ in range(1, self.vertices):
             for v in range(1, self.vertices+1):
                 for i in self.V_Adj(v):
-
                     self.Relax(v, i, self.grafo_ponderado[v-1][i-1])
 
         for u in range(1, self.vertices+1):
@@ -322,21 +315,14 @@ class Grafo_MatrizAdj:
 
     def FechoTransitivo_Warshall(self):
         """ Método que aplica o Alg. de Warshall para retornar o Fecho Transitivo."""
-
-        M_fechoTransitivo = np.array(self.grafo_boleano)
+        import copy
+        M_fechoTransitivo = copy.deepcopy(self.grafo_matriz)
 
         for k in range(self.vertices):
             for i in range(self.vertices):
                 for j in range(self.vertices):
                     M_fechoTransitivo[i][j] = M_fechoTransitivo[i][j] or (M_fechoTransitivo[i][k] and M_fechoTransitivo[k][j])
 
-        # conversão de valores boleanos
-        M_fechoTransitivo= M_fechoTransitivo.tolist()
-
-        for i in range(self.vertices):
-            for j in range(self.vertices):
-                M_fechoTransitivo[i][j] = int(M_fechoTransitivo[i][j] == True)
-     
         return M_fechoTransitivo
 
 # Exemplo - Encontrar componentes conectados - Matrizes de adjacência
